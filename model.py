@@ -1,17 +1,26 @@
 # -*- coding: utf-8 -*-
 
 import keras.backend as K
+from keras import models, layers, applications
 
-def triplet_loss(anchor, positive, negative, margin=1.0):
-    """ 参考 https://pytorch.org/docs/0.3.1/_modules/torch/nn/functional.html#triplet_margin_loss
-    """
-    assert anchor.shape == positive.shape
-    assert anchor.shape == negative.shape
-    assert positive.shape == negative.shape
-    assert margin > 0.0
+
+def build_trip_model(img_h, img_w, n_channel, embedding_size):
+    """"""
+    base_model = applications.Xception(include_top=False, weights='imagenet', 
+                                    input_shape=(img_h, img_w, n_channel), pooling='avg')
+    image_input = base_model.input
+    out = layers.Dense(embedding_size, activation='relu')(base_model.output)
+    out = layers.Lambda(lambda x: K.l2_normalize(x, axis=-1), name='normalize')(out)
+    image_embeder = models.Model(image_input, out)
+
+    anchor_input = layers.Input(shape=(img_h, img_w, n_channel))
+    positive_input = layers.Input(shape=(img_h, img_w, n_channel))
+    negative_input = layers.Input(shape=(img_h, img_w, n_channel))
+
+    anchor_output = image_embeder(anchor_input)
+    positive_output = image_embeder(positive_input)
+    negative_output = image_embeder(negative_input)
     
-    # TODO: 不是特别理解,为什么是先sum后sqrt
-    d_p = K.sqrt(K.sum(K.square(anchor - positive), axis=1, keepdims=True))
-    d_n = K.sqrt(K.sum(K.square(anchor - negative), axis=1, keepdims=True))
-    d_hinge = K.max(d_p - d_n + margin, 0)
-    return K.mean(d_hinge)
+    trip_model = models.Model(inputs=[anchor_input, positive_input, negative_input], \
+                              outputs=[anchor_output, positive_output, negative_output])
+    return trip_model
