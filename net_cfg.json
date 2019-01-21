@@ -1,0 +1,8 @@
+{
+    "img_h": 300,
+    "img_w": 300,
+    "n_channels": 3,
+    "embedding_size": 128,
+    "model_dir": "",
+    "log_dir": ""
+}
