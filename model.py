@@ -20,7 +20,9 @@ def build_trip_model(img_h, img_w, n_channels, embedding_size):
     anchor_output = image_embeder(anchor_input)
     positive_output = image_embeder(positive_input)
     negative_output = image_embeder(negative_input)
+
+    output = layers.concatenate(inputs=[anchor_output, positive_output, negative_output])
     
     trip_model = models.Model(inputs=[anchor_input, positive_input, negative_input], \
-                              outputs=[anchor_output, positive_output, negative_output])
+                              outputs=[output])
     return trip_model
