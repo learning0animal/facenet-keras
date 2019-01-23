@@ -10,16 +10,19 @@ from skimage.transform import resize
 from keras.utils import Sequence
 from keras.applications.inception_resnet_v2 import preprocess_input
 
+from config import batch_size, img_h, img_w, n_channels, embedding_size
+
+
 
 class TripDataGenerator(Sequence):
     
-    def __init__(self, path, config):
+    def __init__(self, path):
 
-        self.batch_size = config['batch_size']
-        self.img_h = config['img_h']
-        self.img_w = config['img_w']
-        self.n_channels = config['n_channels']
-        self.embedding_size = config['embedding_size']
+        self.batch_size = batch_size
+        self.img_h = img_h
+        self.img_w = img_w
+        self.n_channels = n_channels
+        self.embedding_size = embedding_size
 
         self.path = path
         self.labels = os.listdir(self.path)
@@ -29,7 +32,7 @@ class TripDataGenerator(Sequence):
         self.n = len(self.conbs)
 
     def __len__(self):
-        return int(np.ceil( self.n / float(self.batch_size)))
+        return int(np.ceil(self.n / float(self.batch_size)))
 
     def __getitem__(self, idx):
 
@@ -66,9 +69,7 @@ class TripDataGenerator(Sequence):
 
         
 if __name__ == '__main__':
-    with open('net_cfg.json', 'rt') as f:
-        config = json.loads(f.read())
-    gen = TripDataGenerator('./data/train', config)
+    gen = TripDataGenerator('./data/train')
     # print(gen.conbs)
     item = gen.__getitem__(0)
     # print(item)

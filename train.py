@@ -6,28 +6,18 @@ from keras import optimizers
 from loader import TripDataGenerator
 from model import build_trip_model
 from loss import triplet_loss
-from config import config
-
-
-# def load_config(config_path):
-#     with open(config_path, 'rt') as f:
-#         config = json.loads(f.read())
-#     return config
 
 
 def main():
-    # config_path = args.config
-    # config = load_config(config_path)
-    # print('[INFO] loaded config')
      
-    model = build_trip_model(config['img_h'], config['img_w'], config['n_channels'], config['embedding_size'])
-    model.compile(optimizer='adam', loss=triplet_loss)
+    model = build_trip_model()
+    model.compile(optimizer=optimizers.Adam(lr=0.001), loss=triplet_loss)
     print('[INFO] init model')
     
     TRN_PATH = './data/train'
     TST_PATH = './data/test'
-    trn_gen = TripDataGenerator(TRN_PATH, config)
-    val_gen = TripDataGenerator(TST_PATH, config)
+    trn_gen = TripDataGenerator(TRN_PATH)
+    val_gen = TripDataGenerator(TST_PATH)
 
     model.fit_generator(trn_gen, steps_per_epoch=trn_gen.n // trn_gen.batch_size, 
                     validation_data=val_gen, validation_steps=val_gen.n // val_gen.batch_size, 
